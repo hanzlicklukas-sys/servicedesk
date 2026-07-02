@@ -23,7 +23,7 @@ import {
 } from "@phosphor-icons/react";
 import { ChangeEvent, FormEvent, ReactNode, RefObject, useEffect, useMemo, useRef, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { fetchServiceDeskData, isSupabaseConfigured, supabase, syncServiceDeskData, type SupabaseAppData } from "@/lib/supabase";
+import { deleteServiceDeskCustomer, deleteServiceDeskJob, fetchServiceDeskData, isSupabaseConfigured, supabase, syncServiceDeskData, type SupabaseAppData } from "@/lib/supabase";
 import styles from "./page.module.css";
 
 type ServiceType = "Garten" | "Technik";
@@ -328,6 +328,7 @@ export default function HomePage() {
   const applyingRemoteDataRef = useRef(false);
   const localDataRef = useRef<AppData>(starterData);
   const remoteLoadedForUserRef = useRef<string | null>(null);
+  const skipRemoteRefreshUntilRef = useRef(0);
 
   function applyRemoteData(remoteData: AppData) {
     const normalizedRemoteData = normalizeData(remoteData);
@@ -438,7 +439,12 @@ export default function HomePage() {
     let stopped = false;
 
     async function refreshFromSupabase() {
-      if (stopped || applyingRemoteDataRef.current || document.hidden) return;
+      if (
+        stopped ||
+        applyingRemoteDataRef.current ||
+        document.hidden ||
+        Date.now() < skipRemoteRefreshUntilRef.current
+      ) return;
 
       try {
         const remoteData = await fetchServiceDeskData();
@@ -595,10 +601,16 @@ export default function HomePage() {
   }
 
   function deleteJob(jobId: string) {
+    skipRemoteRefreshUntilRef.current = Date.now() + 3000;
     setData((current) => ({
       ...current,
       jobs: current.jobs.filter((job) => job.id !== jobId)
     }));
+    if (session) {
+      deleteServiceDeskJob(jobId)
+        .then(() => setSyncStatus("Mit Supabase synchronisiert"))
+        .catch((error) => setSyncStatus(syncErrorMessage(error)));
+    }
     setEditingJob(null);
   }
 
@@ -624,10 +636,16 @@ export default function HomePage() {
   }
 
   function deleteCustomer(customerId: string) {
+    skipRemoteRefreshUntilRef.current = Date.now() + 3000;
     setData((current) => ({
       customers: current.customers.filter((customer) => customer.id !== customerId),
       jobs: current.jobs.filter((job) => job.customerId !== customerId)
     }));
+    if (session) {
+      deleteServiceDeskCustomer(customerId)
+        .then(() => setSyncStatus("Mit Supabase synchronisiert"))
+        .catch((error) => setSyncStatus(syncErrorMessage(error)));
+    }
     setEditingCustomer(null);
   }
 

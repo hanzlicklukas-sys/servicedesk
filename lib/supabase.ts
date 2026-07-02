@@ -167,6 +167,24 @@ export async function fetchServiceDeskData(): Promise<SupabaseAppData | null> {
   };
 }
 
+export async function deleteServiceDeskJob(jobId: string) {
+  if (!supabase) return;
+
+  const { error } = await supabase.from("jobs").delete().eq("id", jobId);
+
+  if (error) throw error;
+}
+
+export async function deleteServiceDeskCustomer(customerId: string) {
+  if (!supabase) return;
+
+  const { error: jobsError } = await supabase.from("jobs").delete().eq("customer_id", customerId);
+  if (jobsError) throw jobsError;
+
+  const { error: customerError } = await supabase.from("customers").delete().eq("id", customerId);
+  if (customerError) throw customerError;
+}
+
 export async function syncServiceDeskData(data: SupabaseAppData) {
   if (!supabase) return;
 
