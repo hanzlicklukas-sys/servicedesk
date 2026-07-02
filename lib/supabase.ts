@@ -62,6 +62,11 @@ type JobRow = {
   status: SupabaseJobStatus;
 };
 
+type DeletedRecordRow = {
+  record_type: "customer" | "job";
+  record_id: string;
+};
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -131,6 +136,40 @@ function toJobRow(job: SupabaseJob): JobRow {
   };
 }
 
+async function fetchDeletedRecords() {
+  if (!supabase) return { customers: new Set<string>(), jobs: new Set<string>() };
+
+  const { data, error } = await supabase
+    .from("deleted_records")
+    .select("record_type, record_id");
+
+  if (error) throw error;
+
+  const customers = new Set<string>();
+  const jobs = new Set<string>();
+
+  (data ?? []).forEach((row) => {
+    const deleted = row as DeletedRecordRow;
+    if (deleted.record_type === "customer") customers.add(deleted.record_id);
+    if (deleted.record_type === "job") jobs.add(deleted.record_id);
+  });
+
+  return { customers, jobs };
+}
+
+async function markDeleted(recordType: "customer" | "job", recordId: string) {
+  if (!supabase) return;
+
+  const { error } = await supabase
+    .from("deleted_records")
+    .upsert(
+      { record_type: recordType, record_id: recordId },
+      { onConflict: "record_type,record_id" }
+    );
+
+  if (error) throw error;
+}
+
 async function deleteRowsMissingLocally(table: "customers" | "jobs", idsToKeep: string[]) {
   if (!supabase) return;
 
@@ -153,7 +192,8 @@ async function deleteRowsMissingLocally(table: "customers" | "jobs", idsToKeep: 
 export async function fetchServiceDeskData(): Promise<SupabaseAppData | null> {
   if (!supabase) return null;
 
-  const [customersResult, jobsResult] = await Promise.all([
+  const [deleted, customersResult, jobsResult] = await Promise.all([
+    fetchDeletedRecords(),
     supabase.from("customers").select("*").order("created_at", { ascending: false }),
     supabase.from("jobs").select("*").order("date", { ascending: false })
   ]);
@@ -162,38 +202,59 @@ export async function fetchServiceDeskData(): Promise<SupabaseAppData | null> {
   if (jobsResult.error) throw jobsResult.error;
 
   return {
-    customers: (customersResult.data ?? []).map((row) => toCustomer(row as CustomerRow)),
-    jobs: (jobsResult.data ?? []).map((row) => toJob(row as JobRow))
+    customers: (customersResult.data ?? [])
+      .map((row) => toCustomer(row as CustomerRow))
+      .filter((customer) => !deleted.customers.has(customer.id)),
+    jobs: (jobsResult.data ?? [])
+      .map((row) => toJob(row as JobRow))
+      .filter((job) => !deleted.jobs.has(job.id) && !deleted.customers.has(job.customerId))
   };
 }
 
 export async function deleteServiceDeskJob(jobId: string) {
   if (!supabase) return;
 
-  const { data, error } = await supabase.from("jobs").delete().eq("id", jobId).select("id");
+  await markDeleted("job", jobId);
+
+  const { error } = await supabase.from("jobs").delete().eq("id", jobId);
 
   if (error) throw error;
-  if (!data?.length) throw new Error("Auftrag konnte online nicht gelöscht werden");
 }
 
 export async function deleteServiceDeskCustomer(customerId: string) {
   if (!supabase) return;
 
+  const { data: relatedJobs, error: relatedJobsError } = await supabase
+    .from("jobs")
+    .select("id")
+    .eq("customer_id", customerId);
+
+  if (relatedJobsError) throw relatedJobsError;
+
+  await Promise.all([
+    markDeleted("customer", customerId),
+    ...(relatedJobs ?? []).map((job) => markDeleted("job", String(job.id)))
+  ]);
+
   const { error: jobsError } = await supabase.from("jobs").delete().eq("customer_id", customerId);
   if (jobsError) throw jobsError;
 
-  const { data, error: customerError } = await supabase.from("customers").delete().eq("id", customerId).select("id");
+  const { error: customerError } = await supabase.from("customers").delete().eq("id", customerId);
   if (customerError) throw customerError;
-  if (!data?.length) throw new Error("Kunde konnte online nicht gelöscht werden");
 }
 
 export async function syncServiceDeskData(data: SupabaseAppData) {
   if (!supabase) return;
 
-  const customerRows = data.customers.map(toCustomerRow);
-  const jobRows = data.jobs.map(toJobRow);
-  const customerIds = data.customers.map((customer) => customer.id);
-  const jobIds = data.jobs.map((job) => job.id);
+  const deleted = await fetchDeletedRecords();
+  const visibleCustomers = data.customers.filter((customer) => !deleted.customers.has(customer.id));
+  const visibleJobs = data.jobs.filter(
+    (job) => !deleted.jobs.has(job.id) && !deleted.customers.has(job.customerId)
+  );
+  const customerRows = visibleCustomers.map(toCustomerRow);
+  const jobRows = visibleJobs.map(toJobRow);
+  const customerIds = visibleCustomers.map((customer) => customer.id);
+  const jobIds = visibleJobs.map((job) => job.id);
 
   if (customerRows.length) {
     const { error } = await supabase.from("customers").upsert(customerRows, { onConflict: "id" });
