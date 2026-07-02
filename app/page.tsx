@@ -513,8 +513,9 @@ export default function HomePage() {
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js").then(() => {
+      navigator.serviceWorker.register("/sw.js?v=4").then((registration) => {
         setOfflineReady(true);
+        registration.update().catch(() => {});
       }).catch(() => {
         // ServiceDesk works without offline cache; registration is just a bonus.
       });
