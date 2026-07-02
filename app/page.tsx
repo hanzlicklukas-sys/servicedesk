@@ -353,6 +353,7 @@ export default function HomePage() {
   const applyingRemoteDataRef = useRef(false);
   const localDataRef = useRef<AppData>(starterData);
   const remoteLoadedForUserRef = useRef<string | null>(null);
+  const remoteReadyForUserRef = useRef<string | null>(null);
   const skipRemoteRefreshUntilRef = useRef(0);
   const deletedRecordsRef = useRef<DeletedRecords>({ customers: [], jobs: [] });
 
@@ -407,7 +408,10 @@ export default function HomePage() {
       setSession(nextSession);
       setAuthReady(true);
       setSyncStatus(nextSession ? "Verbinde mit Supabase" : "Bitte einloggen");
-      if (!nextSession) remoteLoadedForUserRef.current = null;
+      if (!nextSession) {
+        remoteLoadedForUserRef.current = null;
+        remoteReadyForUserRef.current = null;
+      }
     });
 
     return () => listener.subscription.unsubscribe();
@@ -427,6 +431,11 @@ export default function HomePage() {
     setSyncStatus("Sync läuft");
     if (!session) {
       setSyncStatus(authReady ? "Bitte einloggen" : "Login wird geprüft");
+      return;
+    }
+
+    if (remoteReadyForUserRef.current !== session.user.id) {
+      setSyncStatus("Lade Supabase-Daten");
       return;
     }
 
@@ -465,6 +474,7 @@ export default function HomePage() {
         }
       })
       .then(() => {
+        remoteReadyForUserRef.current = session.user.id;
         setSyncStatus("Mit Supabase synchronisiert");
       })
       .catch((error) => {
