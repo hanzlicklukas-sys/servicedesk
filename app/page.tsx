@@ -298,6 +298,14 @@ function normalizeData(parsed: Partial<AppData>): AppData {
   };
 }
 
+function syncErrorMessage(error: unknown) {
+  if (error instanceof Error && error.message) {
+    return `Sync-Fehler: ${error.message.slice(0, 48)}`;
+  }
+
+  return "Supabase nicht erreichbar";
+}
+
 export default function HomePage() {
   const [view, setView] = useState<View>("dashboard");
   const [data, setData] = useState<AppData>(starterData);
@@ -392,7 +400,7 @@ export default function HomePage() {
     const timeout = window.setTimeout(() => {
       syncServiceDeskData(data as SupabaseAppData)
         .then(() => setSyncStatus("Mit Supabase synchronisiert"))
-        .catch(() => setSyncStatus("Supabase nicht erreichbar"));
+        .catch((error) => setSyncStatus(syncErrorMessage(error)));
     }, 700);
 
     return () => window.clearTimeout(timeout);
@@ -419,8 +427,8 @@ export default function HomePage() {
       .then(() => {
         setSyncStatus("Mit Supabase synchronisiert");
       })
-      .catch(() => {
-        setSyncStatus("Supabase nicht erreichbar");
+      .catch((error) => {
+        setSyncStatus(syncErrorMessage(error));
       });
   }, [authReady, loaded, session]);
 
@@ -438,8 +446,8 @@ export default function HomePage() {
         if (remoteData.customers.length > 0 || remoteData.jobs.length > 0) {
           applyRemoteData(remoteData);
         }
-      } catch {
-        setSyncStatus("Supabase nicht erreichbar");
+      } catch (error) {
+        setSyncStatus(syncErrorMessage(error));
       }
     }
 

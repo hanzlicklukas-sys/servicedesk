@@ -45,15 +45,35 @@ begin
 end;
 $$ language plpgsql;
 
+create or replace function public.set_servicedesk_owner()
+returns trigger as $$
+begin
+  if new.user_id is null then
+    new.user_id = auth.uid();
+  end if;
+  return new;
+end;
+$$ language plpgsql;
+
 drop trigger if exists customers_updated_at on public.customers;
 create trigger customers_updated_at
 before update on public.customers
 for each row execute function public.set_updated_at();
 
+drop trigger if exists customers_set_owner on public.customers;
+create trigger customers_set_owner
+before insert or update on public.customers
+for each row execute function public.set_servicedesk_owner();
+
 drop trigger if exists jobs_updated_at on public.jobs;
 create trigger jobs_updated_at
 before update on public.jobs
 for each row execute function public.set_updated_at();
+
+drop trigger if exists jobs_set_owner on public.jobs;
+create trigger jobs_set_owner
+before insert or update on public.jobs
+for each row execute function public.set_servicedesk_owner();
 
 alter table public.customers enable row level security;
 alter table public.jobs enable row level security;
@@ -68,23 +88,23 @@ drop policy if exists "ServiceDesk customers own delete" on public.customers;
 create policy "ServiceDesk customers own read"
 on public.customers for select
 to authenticated
-using (user_id = auth.uid());
+using (user_id = auth.uid() or user_id is null);
 
 create policy "ServiceDesk customers own insert"
 on public.customers for insert
 to authenticated
-with check (user_id = auth.uid());
+with check (user_id = auth.uid() or user_id is null);
 
 create policy "ServiceDesk customers own update"
 on public.customers for update
 to authenticated
-using (user_id = auth.uid())
-with check (user_id = auth.uid());
+using (user_id = auth.uid() or user_id is null)
+with check (user_id = auth.uid() or user_id is null);
 
 create policy "ServiceDesk customers own delete"
 on public.customers for delete
 to authenticated
-using (user_id = auth.uid());
+using (user_id = auth.uid() or user_id is null);
 
 drop policy if exists "ServiceDesk jobs read" on public.jobs;
 drop policy if exists "ServiceDesk jobs write" on public.jobs;
@@ -96,20 +116,20 @@ drop policy if exists "ServiceDesk jobs own delete" on public.jobs;
 create policy "ServiceDesk jobs own read"
 on public.jobs for select
 to authenticated
-using (user_id = auth.uid());
+using (user_id = auth.uid() or user_id is null);
 
 create policy "ServiceDesk jobs own insert"
 on public.jobs for insert
 to authenticated
-with check (user_id = auth.uid());
+with check (user_id = auth.uid() or user_id is null);
 
 create policy "ServiceDesk jobs own update"
 on public.jobs for update
 to authenticated
-using (user_id = auth.uid())
-with check (user_id = auth.uid());
+using (user_id = auth.uid() or user_id is null)
+with check (user_id = auth.uid() or user_id is null);
 
 create policy "ServiceDesk jobs own delete"
 on public.jobs for delete
 to authenticated
-using (user_id = auth.uid());
+using (user_id = auth.uid() or user_id is null);
