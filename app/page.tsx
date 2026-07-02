@@ -321,6 +321,21 @@ export default function HomePage() {
   const localDataRef = useRef<AppData>(starterData);
   const remoteLoadedForUserRef = useRef<string | null>(null);
 
+  function applyRemoteData(remoteData: AppData) {
+    const normalizedRemoteData = normalizeData(remoteData);
+    const remoteSnapshot = JSON.stringify(normalizedRemoteData);
+    const localSnapshot = JSON.stringify(localDataRef.current);
+
+    if (remoteSnapshot === localSnapshot) return;
+
+    applyingRemoteDataRef.current = true;
+    setData(normalizedRemoteData);
+    window.localStorage.setItem(STORAGE_KEY, remoteSnapshot);
+    window.setTimeout(() => {
+      applyingRemoteDataRef.current = false;
+    }, 0);
+  }
+
   useEffect(() => {
     const saved = window.localStorage.getItem(STORAGE_KEY);
     let localData = starterData;
@@ -396,13 +411,7 @@ export default function HomePage() {
         const hasRemoteData = remoteData.customers.length > 0 || remoteData.jobs.length > 0;
 
         if (hasRemoteData) {
-          applyingRemoteDataRef.current = true;
-          const normalizedRemoteData = normalizeData(remoteData);
-          setData(normalizedRemoteData);
-          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizedRemoteData));
-          window.setTimeout(() => {
-            applyingRemoteDataRef.current = false;
-          }, 0);
+          applyRemoteData(remoteData);
         } else {
           return syncServiceDeskData(localDataRef.current as SupabaseAppData);
         }
@@ -413,6 +422,42 @@ export default function HomePage() {
       .catch(() => {
         setSyncStatus("Supabase nicht erreichbar");
       });
+  }, [authReady, loaded, session]);
+
+  useEffect(() => {
+    if (!loaded || !authReady || !session) return;
+
+    let stopped = false;
+
+    async function refreshFromSupabase() {
+      if (stopped || applyingRemoteDataRef.current || document.hidden) return;
+
+      try {
+        const remoteData = await fetchServiceDeskData();
+        if (!remoteData || stopped) return;
+        if (remoteData.customers.length > 0 || remoteData.jobs.length > 0) {
+          applyRemoteData(remoteData);
+        }
+      } catch {
+        setSyncStatus("Supabase nicht erreichbar");
+      }
+    }
+
+    const interval = window.setInterval(refreshFromSupabase, 5000);
+
+    function refreshWhenVisible() {
+      if (!document.hidden) refreshFromSupabase();
+    }
+
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+    window.addEventListener("focus", refreshFromSupabase);
+
+    return () => {
+      stopped = true;
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+      window.removeEventListener("focus", refreshFromSupabase);
+    };
   }, [authReady, loaded, session]);
 
   useEffect(() => {
