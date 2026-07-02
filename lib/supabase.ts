@@ -131,6 +131,25 @@ function toJobRow(job: SupabaseJob): JobRow {
   };
 }
 
+async function deleteRowsMissingLocally(table: "customers" | "jobs", idsToKeep: string[]) {
+  if (!supabase) return;
+
+  const { data, error } = await supabase.from(table).select("id");
+
+  if (error) throw error;
+
+  const keep = new Set(idsToKeep);
+  const staleIds = (data ?? [])
+    .map((row) => String(row.id))
+    .filter((id) => !keep.has(id));
+
+  if (!staleIds.length) return;
+
+  const { error: deleteError } = await supabase.from(table).delete().in("id", staleIds);
+
+  if (deleteError) throw deleteError;
+}
+
 export async function fetchServiceDeskData(): Promise<SupabaseAppData | null> {
   if (!supabase) return null;
 
@@ -166,19 +185,6 @@ export async function syncServiceDeskData(data: SupabaseAppData) {
     if (error) throw error;
   }
 
-  if (customerIds.length) {
-    const { error } = await supabase.from("customers").delete().not("id", "in", `(${customerIds.join(",")})`);
-    if (error) throw error;
-  } else {
-    const { error } = await supabase.from("customers").delete().neq("id", "");
-    if (error) throw error;
-  }
-
-  if (jobIds.length) {
-    const { error } = await supabase.from("jobs").delete().not("id", "in", `(${jobIds.join(",")})`);
-    if (error) throw error;
-  } else {
-    const { error } = await supabase.from("jobs").delete().neq("id", "");
-    if (error) throw error;
-  }
+  await deleteRowsMissingLocally("jobs", jobIds);
+  await deleteRowsMissingLocally("customers", customerIds);
 }

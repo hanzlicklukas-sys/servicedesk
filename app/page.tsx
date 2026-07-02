@@ -443,9 +443,7 @@ export default function HomePage() {
       try {
         const remoteData = await fetchServiceDeskData();
         if (!remoteData || stopped) return;
-        if (remoteData.customers.length > 0 || remoteData.jobs.length > 0) {
-          applyRemoteData(remoteData);
-        }
+        applyRemoteData(remoteData);
       } catch (error) {
         setSyncStatus(syncErrorMessage(error));
       }
