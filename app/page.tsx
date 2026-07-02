@@ -465,13 +465,7 @@ export default function HomePage() {
     fetchServiceDeskData()
       .then((remoteData) => {
         if (!remoteData) return;
-        const hasRemoteData = remoteData.customers.length > 0 || remoteData.jobs.length > 0;
-
-        if (hasRemoteData) {
-          applyRemoteData(remoteData);
-        } else {
-          return syncServiceDeskData(localDataRef.current as SupabaseAppData);
-        }
+        applyRemoteData(remoteData);
       })
       .then(() => {
         remoteReadyForUserRef.current = session.user.id;
