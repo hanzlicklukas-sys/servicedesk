@@ -1,0 +1,21 @@
+{
+  "name": "ServiceDesk",
+  "short_name": "ServiceDesk",
+  "description": "Kunden, Aufträge, Termine und Finanzen für Lukas' Servicegeschäft.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fbfcfe",
+  "theme_color": "#061321",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/servicedesk-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity", "utilities"],
+  "lang": "de-DE"
+}

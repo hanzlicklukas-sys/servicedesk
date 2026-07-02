@@ -1,0 +1,174 @@
+.shell{min-height:100vh;background:#fbfcfe}.sidebar{position:fixed;inset:0 auto 0 0;z-index:10;width:72px;padding:24px 8px 18px;background:#061321;color:#fff;display:flex;flex-direction:column;align-items:center}.brand{width:42px;height:42px;border:0;background:transparent;color:#fff;font-size:1.65rem;font-weight:500;cursor:pointer;position:relative}.brand::after{content:"";position:absolute;left:50%;bottom:-5px;width:6px;height:6px;border-radius:50%;background:#2563eb;transform:translateX(-50%)}.navigation{width:100%;margin-top:52px;display:grid;gap:22px}.navigation button{border:0;padding:5px 0;background:transparent;color:#b7c0cc;display:grid;justify-items:center;gap:7px;font-size:.64rem;line-height:1;cursor:pointer}.navigation svg{width:22px;height:22px}.navigation button:hover,.navigation .active{color:#fff}.navigation .active{color:#3b82f6}.savedStatus{margin-top:auto;color:#718096;display:grid;justify-items:center;gap:4px;font-size:.58rem}.savedStatus svg{width:18px;height:18px}.content{margin-left:72px;min-height:100vh;padding:56px clamp(32px,7vw,104px) 72px}.topbar{max-width:1180px;margin:0 auto 36px;display:flex;justify-content:space-between;align-items:flex-start;gap:28px}.topbar h1{margin:0;color:#0d2138;font-size:clamp(1.75rem,2.3vw,2.25rem);line-height:1.1;letter-spacing:-.045em;font-weight:620}.topbar p{margin:10px 0 0;color:#697586;font-size:.9rem;text-transform:capitalize}.topActions{display:flex;align-items:center;gap:16px}.primaryButton,.textButton{min-height:40px;border:0;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:650;font-size:.86rem;cursor:pointer}.primaryButton{border-radius:4px;background:#2563eb;color:#fff}.primaryButton:hover{background:#1d4ed8}.textButton{background:transparent;color:#405168}.primaryButton svg,.textButton svg{width:16px;height:16px}.dashboardFacts{max-width:1180px;margin:0 auto 64px;display:flex;align-items:center;gap:48px;color:#4a586b;font-size:.92rem}.dashboardFacts span{display:inline-flex;align-items:center;gap:9px}.dashboardFacts svg{width:17px;height:17px;color:#718096}.dashboardFacts .revenueFact{margin-left:auto;color:#0d2138;font-weight:650}.dashboardFacts .revenueFact svg{color:#2563eb}.dashboardGrid,.financeGrid{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:minmax(0,2.6fr) minmax(250px,.9fr);gap:48px}.schedule{min-width:0}.sectionHeader{min-height:42px;display:flex;align-items:flex-start;justify-content:space-between;gap:20px}.sectionHeader>div>span,.overline{display:block;margin-bottom:7px;color:#7c8796;font-size:.66rem;line-height:1.2;font-weight:750;letter-spacing:.13em;text-transform:uppercase}.sectionHeader h2,.nextAppointment h2{margin:0;color:#10243a;font-size:1.16rem;line-height:1.25;letter-spacing:-.02em;font-weight:620}.jobTable{margin-top:10px;min-width:0}.tableHeader,.jobRow{display:grid;grid-template-columns:108px minmax(140px,1.1fr) minmax(160px,1fr) minmax(100px,.65fr);align-items:center;column-gap:24px}.tableHeader{min-height:38px;padding:0 18px;border-bottom:1px solid #dfe5ec;color:#7b8695;font-size:.64rem;font-weight:750;letter-spacing:.12em;text-transform:uppercase}.jobRow{min-height:66px;padding:0 18px;border-bottom:1px solid #e6eaf0;color:#59677a;font-size:.86rem;position:relative}.jobRow>strong{color:#10243a;font-weight:620}.nextRow{background:#f7f9fd}.nextRow::before{content:"";position:absolute;left:17px;width:7px;height:7px;border-radius:50%;background:#2563eb}.nextRow .jobTime{padding-left:22px}.jobTime{color:#10243a;font-variant-numeric:tabular-nums}.statusText{color:#697586}.priceCell{display:flex;align-items:center;justify-content:space-between;gap:10px}.priceCell strong{color:#10243a;font-weight:650;font-variant-numeric:tabular-nums}.priceCell small{color:#7b8695}.priceCell button{border:0;padding:3px 0;background:transparent;color:#2563eb;font-size:.72rem;font-weight:650;cursor:pointer}.inlineLink{width:fit-content;border:0;margin-top:22px;padding:0;background:transparent;color:#2563eb;display:inline-flex;align-items:center;gap:8px;font-size:.86rem;font-weight:600;text-decoration:none;cursor:pointer}.inlineLink svg{width:16px;height:16px}.nextAppointment,.financeBreakdown{min-height:330px;padding:55px 0 0 44px;border-left:1px solid #dfe5ec}.nextAppointment h2{margin:28px 0 30px;font-size:1.25rem}.detailLine{margin:0 0 16px;color:#667489;display:flex;align-items:flex-start;gap:12px;font-size:.84rem;line-height:1.45;text-decoration:none}.detailLine svg{flex:0 0 auto;width:17px;height:17px;margin-top:1px}.appointmentNote{max-width:230px;margin:28px 0 0;color:#667489;font-size:.84rem;line-height:1.6}.pageSection{max-width:1180px;margin:0 auto}.customerList{margin-top:22px}.customerRow{min-height:76px;padding:12px 6px;border-bottom:1px solid #e3e8ee;display:grid;grid-template-columns:40px minmax(180px,1.1fr) 90px 150px minmax(220px,1fr);align-items:center;gap:20px;color:#667489;font-size:.82rem}.avatar{width:34px;height:34px;border-radius:50%;background:#edf2f8;color:#405168;display:grid;place-items:center;font-weight:700}.customerIdentity{display:grid;gap:5px}.customerIdentity strong{color:#10243a;font-size:.9rem}.customerRow a{color:#2563eb;text-decoration:none}.customerNote{line-height:1.45}.muted{color:#7b8695}.financeMetrics{max-width:1180px;margin:0 auto 56px;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #dfe5ec;border-bottom:1px solid #dfe5ec}.financeMetrics article{min-height:132px;padding:24px 30px;border-right:1px solid #dfe5ec}.financeMetrics article:first-child{padding-left:0}.financeMetrics article:last-child{border-right:0}.financeMetrics span,.financeMetrics small{display:block;color:#748093;font-size:.76rem}.financeMetrics strong{display:block;margin:12px 0 9px;color:#10243a;font-size:1.8rem;line-height:1;letter-spacing:-.04em;font-weight:620;font-variant-numeric:tabular-nums}.financeMetrics button{border:0;padding:0;background:transparent;color:#2563eb;display:flex;align-items:center;gap:6px;font-size:.74rem;font-weight:650;cursor:pointer}.financeMetrics button svg{width:14px;height:14px}.financeBreakdown{padding-top:18px}.financeBreakdown>div{padding:22px 0;border-bottom:1px solid #e3e8ee}.financeBreakdown>div span,.financeBreakdown>div strong{display:block}.financeBreakdown>div span{color:#748093;font-size:.76rem}.financeBreakdown>div strong{margin-top:8px;color:#10243a;font-size:1.2rem}.financeBreakdown>p{margin:24px 0 0;color:#7b8695;font-size:.76rem;line-height:1.55}.empty{margin:0;padding:32px 18px;color:#7b8695;border-bottom:1px solid #e3e8ee}.backdrop{position:fixed;inset:0;z-index:20;padding:20px;background:rgba(6,19,33,.58);display:grid;place-items:center}.modal{width:min(500px,100%);max-height:90vh;overflow:auto;padding:26px;border-radius:8px;background:#fff;box-shadow:0 24px 80px rgba(6,19,33,.22)}.modal header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}.modal h2{margin:0;color:#10243a;font-size:1.25rem;font-weight:620}.modal header button{width:34px;height:34px;border:0;background:transparent;color:#59677a;display:grid;place-items:center;cursor:pointer}.modal header svg{width:20px;height:20px}.form{display:grid;gap:16px}.formColumns{display:grid;grid-template-columns:1fr 1fr;gap:14px}.form label{display:grid;gap:7px;color:#566477;font-size:.76rem;font-weight:650}.form input,.form select,.form textarea{width:100%;border:1px solid #d6dde6;border-radius:4px;padding:10px 11px;background:#fff;color:#10243a;outline:none}.form input:focus,.form select:focus,.form textarea:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.offlineStatus{position:fixed;left:88px;bottom:18px;z-index:9;min-height:30px;border:1px solid #dfe5ec;border-radius:999px;padding:0 11px;background:rgba(255,255,255,.86);backdrop-filter:blur(12px);color:#667489;display:flex;align-items:center;gap:8px;font-size:.68rem;font-weight:650;box-shadow:0 10px 30px rgba(15,35,56,.08)}
+.offlineStatus span{width:7px;height:7px;border-radius:50%;background:#2563eb;box-shadow:0 0 0 4px rgba(37,99,235,.1)}
+.offlineStatus.isOffline{color:#10243a;border-color:#cbd5e1}
+.offlineStatus.isOffline span{background:#10243a;box-shadow:0 0 0 4px rgba(16,36,58,.1)}
+@media(max-width:980px){.content{padding-inline:32px}.dashboardGrid,.financeGrid{grid-template-columns:1fr}.nextAppointment,.financeBreakdown{min-height:0;padding:28px 0 0;border-top:1px solid #dfe5ec;border-left:0}.customerRow{grid-template-columns:40px 1fr 100px 140px}.customerNote{display:none}}
+@media(max-width:720px){.shell{padding-bottom:72px}.sidebar{inset:auto 0 0;width:auto;height:66px;padding:6px 10px;display:block}.brand,.savedStatus{display:none}.navigation{height:100%;margin:0;grid-template-columns:repeat(4,1fr);gap:6px}.navigation button{gap:4px;font-size:.59rem}.navigation svg{width:20px;height:20px}.offlineStatus{left:18px;right:auto;bottom:78px}.content{margin-left:0;padding:28px 18px 34px}.topbar{margin-bottom:28px;align-items:center}.topbar h1{font-size:1.55rem}.topbar p{margin-top:6px;font-size:.76rem}.topActions{gap:4px}.textButton{width:40px;padding:0;font-size:0}.primaryButton{min-height:38px;padding:0 12px;font-size:.76rem}.dashboardFacts{margin-bottom:38px;gap:18px;flex-wrap:wrap;font-size:.78rem}.dashboardFacts .revenueFact{width:100%;margin-left:0}.tableHeader{display:none}.jobRow{grid-template-columns:62px 1fr auto;gap:10px;min-height:70px;padding:10px 6px}.jobRow>span:nth-child(3){grid-column:2;font-size:.75rem}.jobRow>:last-child{grid-column:3;grid-row:1/span 2}.nextRow::before{left:0}.nextRow .jobTime{padding-left:12px}.customerRow{grid-template-columns:38px 1fr auto;gap:12px}.customerRow>a{grid-column:2}.customerRow>.muted{grid-column:3;grid-row:1}.financeMetrics{grid-template-columns:1fr;margin-bottom:38px}.financeMetrics article,.financeMetrics article:first-child{min-height:0;padding:20px 0;border-right:0;border-bottom:1px solid #dfe5ec}.financeMetrics article:last-child{border-bottom:0}.formColumns{grid-template-columns:1fr}}
+
+.priceCell>strong{color:#10243a;font-weight:650;font-variant-numeric:tabular-nums}
+.rowActions{display:flex;align-items:center;justify-content:flex-end;gap:10px}
+.priceCell .editButton{width:28px;height:28px;padding:0;border-radius:4px;color:#59677a;display:grid;place-items:center}
+.priceCell .editButton:hover{background:#edf2f8;color:#2563eb}
+.editButton svg{width:16px;height:16px}
+.form label small{color:#8a94a3;font-size:.68rem;font-weight:500}
+.formFooter{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:4px}
+.deleteButton,.confirmDeleteButton{min-height:40px;border:0;padding:0;background:transparent;color:#b42318;display:inline-flex;align-items:center;gap:7px;font-weight:650;font-size:.78rem;cursor:pointer}
+.deleteButton svg{width:16px;height:16px}
+.confirmDeleteButton{padding:0 12px;border-radius:4px;background:#fff0ee}
+.customerRow{grid-template-columns:40px minmax(180px,1.1fr) 90px 150px minmax(220px,1fr) 32px}
+.customerWorkspace{margin-top:22px;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(310px,.75fr);gap:34px;align-items:start}
+.customerWorkspace .customerList{margin-top:0}
+.customerRow{cursor:pointer;transition:background .16s ease}
+.customerRow:hover,.selectedCustomerRow{background:#f4f7fb}
+.selectedCustomerRow{box-shadow:inset 3px 0 0 #2563eb}
+.customerEditButton{width:30px;height:30px;border:0;border-radius:4px;background:transparent;color:#697586;display:grid;place-items:center;cursor:pointer}
+.customerEditButton:hover{background:#edf2f8;color:#2563eb}
+.customerEditButton svg{width:16px;height:16px}
+.customerProfile{position:sticky;top:28px;border:1px solid #dfe5ec;border-radius:12px;background:#fff;padding:24px;box-shadow:0 18px 44px rgba(15,35,56,.04)}
+.customerProfileHeader{display:grid;grid-template-columns:52px 1fr 32px;gap:14px;align-items:start}
+.profileAvatar{width:52px;height:52px;border-radius:16px;background:#10243a;color:#fff;display:grid;place-items:center;font-size:1.2rem;font-weight:700}
+.customerProfile h2{margin:4px 0 5px;color:#10243a;font-size:1.22rem;letter-spacing:-.03em}
+.customerProfile p{margin:0;color:#667489;font-size:.82rem;line-height:1.55}
+.profileActions{margin-top:22px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.profileActions a{min-height:40px;border:1px solid #dfe5ec;border-radius:6px;color:#10243a;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px;font-size:.82rem;font-weight:650}
+.profileActions a:hover{border-color:#2563eb;color:#2563eb}
+.profileActions svg{width:16px;height:16px}
+.profileFacts{margin-top:18px;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #e3e8ee;border-bottom:1px solid #e3e8ee}
+.profileFacts span{padding:14px 8px;border-right:1px solid #e3e8ee;color:#667489;font-size:.72rem}
+.profileFacts span:last-child{border-right:0}
+.profileFacts strong{display:block;margin-bottom:5px;color:#10243a;font-size:1rem;font-weight:650;font-variant-numeric:tabular-nums}
+.profileNote{margin-top:20px}
+.profileNote span{color:#7c8796;font-size:.64rem;font-weight:750;letter-spacing:.12em;text-transform:uppercase}
+.profileNote p{margin-top:8px}
+.profileHistory{margin-top:24px}
+.historyItem{width:100%;border:0;border-top:1px solid #e3e8ee;padding:13px 0;background:transparent;color:#10243a;display:flex;align-items:center;justify-content:space-between;gap:16px;text-align:left;cursor:pointer}
+.historyItem:hover strong{color:#2563eb}
+.historyItem span{display:grid;gap:4px;min-width:0}
+.historyItem strong{font-size:.84rem;font-weight:650}
+.historyItem small{color:#7b8695;font-size:.72rem}
+.historyItem b{font-size:.82rem;font-weight:650;font-variant-numeric:tabular-nums}
+.profileHint{margin-top:12px!important;color:#7b8695!important;font-size:.74rem!important}
+@media(max-width:980px){.customerWorkspace{grid-template-columns:1fr}.customerProfile{position:static}.customerRow{grid-template-columns:40px 1fr 100px 140px 32px}.customerEditButton{grid-column:5}.customerNote{display:none}}
+@media(max-width:720px){.customerWorkspace{gap:22px}.customerRow{grid-template-columns:38px 1fr auto 32px}.customerRow>a{grid-column:2}.customerRow>.muted{grid-column:3;grid-row:1}.customerEditButton{grid-column:4;grid-row:1}.profileFacts{grid-template-columns:1fr}.profileFacts span{border-right:0;border-bottom:1px solid #e3e8ee}.profileFacts span:last-child{border-bottom:0}}
+
+.factButton{border:0;margin-left:auto;padding:0;background:transparent;color:#0d2138;display:inline-flex;align-items:center;gap:9px;font:inherit;font-weight:650;cursor:pointer}
+.factButton svg{width:17px;height:17px;color:#2563eb}
+.moneyCard{max-width:1180px;margin:-34px auto 44px;padding:26px 28px 20px;border:1px solid #dfe5ec;border-radius:12px;background:#fff;box-shadow:0 18px 44px rgba(15,35,56,.04)}
+.moneyCardHeader{display:flex;align-items:flex-start;justify-content:space-between;gap:28px}
+.moneyCardHeader h2{margin:0;color:#10243a;font-size:1.22rem;letter-spacing:-.025em;font-weight:620}
+.moneyCardHeader p{max-width:520px;margin:9px 0 0;color:#667489;font-size:.82rem;line-height:1.55}
+.moneyTotal{display:grid;justify-items:end;gap:5px;min-width:180px}
+.moneyTotal span{color:#7c8796;font-size:.68rem;font-weight:750;letter-spacing:.12em;text-transform:uppercase}
+.moneyTotal strong{color:#10243a;font-size:2rem;line-height:1;letter-spacing:-.045em;font-weight:620;font-variant-numeric:tabular-nums}
+.moneyChartWrap{margin-top:20px}
+.moneyChart{width:100%;height:auto;display:block;overflow:visible}
+.moneyGridLine{stroke:#e6eaf0;stroke-width:1}
+.moneyArea{fill:url(#moneyArea)}
+.moneyLine{fill:none;stroke:#2563eb;stroke-width:2.25;stroke-linecap:round;stroke-linejoin:round}
+.moneyDotHalo{fill:#2563eb;opacity:.12}
+.moneyDot{fill:#fff;stroke:#2563eb;stroke-width:2.25}
+.moneyValueLabel{fill:#8a94a3;font-size:10px;font-weight:650}
+.moneyAxis{margin-top:2px;display:flex;justify-content:space-between;color:#7b8695;font-size:.72rem;font-variant-numeric:tabular-nums}
+.moneyFooter{margin-top:14px;padding-top:14px;border-top:1px solid #edf1f6;display:flex;align-items:center;gap:12px;color:#667489;font-size:.78rem}
+.moneyFooter strong{color:#10243a;font-weight:650}
+.moneyEmpty{min-height:190px;margin-top:22px;border:1px dashed #d6dde6;border-radius:10px;background:#f8fafd;color:#667489;display:grid;place-items:center;align-content:center;gap:8px;text-align:center}
+.moneyEmpty svg{width:24px;height:24px;color:#2563eb}
+.moneyEmpty strong{color:#10243a}
+.notice{max-width:1180px;width:100%;min-height:42px;margin:-38px auto 34px;border:1px solid #d8e1ee;border-radius:6px;padding:0 14px;background:#f6f9fd;color:#405168;display:flex;align-items:center;gap:10px;font-size:.82rem;font-weight:650;cursor:pointer}
+.notice svg{width:17px;height:17px;color:#2563eb}
+.financeMetrics{grid-template-columns:repeat(4,1fr)}
+.savingsCard{max-width:1180px;margin:-26px auto 34px;border:1px solid #dfe5ec;border-radius:12px;background:#fff;padding:24px 26px;display:grid;grid-template-columns:minmax(0,1fr) 260px auto;align-items:center;gap:24px;box-shadow:0 18px 44px rgba(15,35,56,.04)}
+.savingsCard h2{margin:0 0 8px;color:#10243a;font-size:1.35rem;letter-spacing:-.03em}
+.savingsCard p{margin:0;color:#667489;font-size:.82rem;line-height:1.5}
+.savingsCard>strong{color:#10243a;font-size:1.1rem;font-weight:650;font-variant-numeric:tabular-nums}
+.savingsProgress{height:9px;border-radius:999px;background:#e8edf5;overflow:hidden}
+.savingsProgress span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#10243a,#2563eb)}
+.financeMetrics article{padding-inline:24px}
+.priceCell>div:first-child{display:grid;gap:4px}
+.priceCell>div:first-child small{display:block}
+@media(max-width:980px){.financeMetrics{grid-template-columns:repeat(2,1fr)}.financeMetrics article:nth-child(2){border-right:0}.financeMetrics article:nth-child(-n+2){border-bottom:1px solid #dfe5ec}}
+@media(max-width:720px){.factButton{width:100%;margin-left:0}.moneyCard{margin:-18px auto 30px;padding:22px 18px}.moneyCardHeader{display:grid;gap:18px}.moneyTotal{justify-items:start}.moneyChartWrap{overflow-x:auto}.moneyChart{min-width:560px}.moneyFooter{display:grid;gap:5px}.notice{margin:-18px auto 26px}.savingsCard{margin:-18px auto 28px;grid-template-columns:1fr;padding:22px 18px;gap:16px}.financeMetrics{grid-template-columns:1fr}.financeMetrics article:nth-child(n){border-right:0;border-bottom:1px solid #dfe5ec}.financeMetrics article:last-child{border-bottom:0}}
+
+.backupGrid{margin-top:24px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.backupCard{min-height:250px;padding:28px;border:1px solid #dfe5ec;border-radius:10px;background:#fff;display:flex;flex-direction:column;align-items:flex-start}
+.backupCard>svg{width:24px;height:24px;color:#2563eb;margin-bottom:24px}
+.backupCard>span{color:#7c8796;font-size:.66rem;font-weight:750;letter-spacing:.13em;text-transform:uppercase}
+.backupCard h3{margin:9px 0 12px;color:#10243a;font-size:1.1rem;letter-spacing:-.02em}
+.backupCard p{margin:0 0 24px;color:#667489;font-size:.84rem;line-height:1.55}
+.backupCard button{margin-top:auto}
+.hiddenInput{display:none}
+.backupMeta{margin-top:18px;padding:14px 0;border-top:1px solid #e3e8ee;border-bottom:1px solid #e3e8ee;display:flex;gap:24px;flex-wrap:wrap;color:#667489;font-size:.82rem}
+.backupMeta span:last-child{margin-left:auto;color:#10243a}
+@media(max-width:720px){.navigation{grid-template-columns:repeat(5,1fr)}.backupGrid{grid-template-columns:1fr}.backupCard{min-height:220px;padding:22px}.backupMeta{display:grid;gap:8px}.backupMeta span:last-child{margin-left:0}}
+
+.clickableJobRow{cursor:pointer;transition:background .16s ease,transform .16s ease}
+.clickableJobRow:hover{background:#f4f7fb}
+.clickableJobRow:focus-visible{outline:2px solid #2563eb;outline-offset:-2px}
+.clickableJobRow .statusText{color:#2563eb;font-weight:650}
+.jobDetailPanel{margin:-4px 0 22px;padding:18px;border:1px solid #dfe5ec;border-radius:8px;background:#f8fafd}
+.jobDetailPanel h3{margin:0;color:#10243a;font-size:1.12rem;letter-spacing:-.02em}
+.jobDetailPanel p{margin:7px 0 0;color:#667489;font-size:.82rem;line-height:1.5}
+.detailGrid{margin-top:18px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 18px}
+.detailGrid span{display:grid;gap:4px;color:#10243a;font-size:.84rem;min-width:0}
+.detailGrid strong{color:#7c8796;font-size:.64rem;letter-spacing:.11em;text-transform:uppercase}
+.detailNote{margin-top:16px!important;padding-top:14px;border-top:1px solid #e3e8ee}
+.calendarButton{min-height:38px;margin-top:16px;border:0;border-radius:4px;padding:0 12px;background:#10243a;color:#fff;display:inline-flex;align-items:center;gap:8px;font-size:.78rem;font-weight:650;cursor:pointer}
+.calendarButton svg{width:16px;height:16px}
+.backupGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:980px){.backupGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){.detailGrid{grid-template-columns:1fr}.clickableJobRow:hover{background:transparent}.backupGrid{grid-template-columns:1fr}}
+
+.content{animation:pageIn .28s ease both}
+.primaryButton,.textButton,.inlineLink,.factButton,.customerEditButton,.calendarButton,.backupCard,.moneyCard,.savingsCard,.customerProfile,.jobRow,.historyItem,.profileActions a{transition:transform .18s ease,background .18s ease,border-color .18s ease,color .18s ease,box-shadow .18s ease,opacity .18s ease}
+.primaryButton:hover,.calendarButton:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(37,99,235,.16)}
+.textButton:hover,.inlineLink:hover,.factButton:hover{opacity:.78}
+.backupCard:hover,.moneyCard:hover,.savingsCard:hover,.customerProfile:hover{box-shadow:0 22px 54px rgba(15,35,56,.07)}
+.clickableJobRow:hover,.customerRow:hover,.historyItem:hover{transform:translateY(-1px)}
+.modal{animation:modalIn .22s ease both}
+.backdrop{animation:fadeIn .18s ease both}
+.emptyState{min-height:178px;margin-top:10px;border:1px dashed #d6dde6;border-radius:12px;background:linear-gradient(180deg,#fff,#f8fafd);color:#667489;display:grid;place-items:center;align-content:center;gap:9px;text-align:center;padding:28px}
+.emptyState div{width:38px;height:38px;border-radius:12px;background:#eef4ff;color:#2563eb;display:grid;place-items:center}
+.emptyState svg{width:20px;height:20px}
+.emptyState strong{color:#10243a;font-size:.95rem}
+.emptyState span{max-width:280px;font-size:.8rem;line-height:1.55}
+.authShell{min-height:100vh;background:radial-gradient(circle at top left,#eef4ff 0,#fbfcfe 34%,#f7f9fd 100%);display:grid;place-items:center;padding:24px}
+.authCard{width:min(430px,100%);border:1px solid #dfe5ec;border-radius:16px;background:rgba(255,255,255,.9);backdrop-filter:blur(16px);padding:34px;box-shadow:0 28px 80px rgba(15,35,56,.1);animation:modalIn .24s ease both}
+.authCard h1{margin:0 0 10px;color:#10243a;font-size:1.8rem;letter-spacing:-.045em}
+.authCard p{margin:0 0 24px;color:#667489;font-size:.9rem;line-height:1.55}
+.authError{margin:0!important;border:1px solid #ffd6d1;border-radius:8px;background:#fff5f3;color:#b42318;padding:10px 12px;font-size:.78rem!important}
+.authSwitch{width:100%;border:0;margin-top:18px;background:transparent;color:#2563eb;font-size:.82rem;font-weight:650;cursor:pointer}
+.authSwitch:hover{opacity:.78}
+.primaryButton:disabled{opacity:.62;cursor:not-allowed;transform:none;box-shadow:none}
+@keyframes pageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes modalIn{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@media(max-width:720px){
+  .topbar{display:grid;gap:18px}
+  .topActions{width:100%;display:flex;flex-wrap:wrap;justify-content:flex-end}
+  .topActions .textButton{width:auto;min-height:38px;padding:0 12px;font-size:.76rem;border:1px solid #dfe5ec;border-radius:4px;background:#fff}
+  .dashboardFacts{display:grid;grid-template-columns:1fr 1fr;align-items:stretch}
+  .dashboardFacts span,.dashboardFacts button{min-height:42px;border:1px solid #e3e8ee;border-radius:8px;padding:0 10px;background:#fff}
+  .dashboardFacts .revenueFact,.dashboardFacts .factButton{grid-column:1/-1}
+  .jobTable{display:grid;gap:10px}
+  .jobRow{border:1px solid #e3e8ee;border-radius:12px;background:#fff;box-shadow:0 12px 30px rgba(15,35,56,.04)}
+  .jobRow>:last-child{align-self:center}
+  .priceCell{display:grid;justify-items:end}
+  .rowActions{justify-content:flex-end}
+  .nextAppointment{padding:22px 0 0}
+  .nextAppointment h2{margin:16px 0 18px}
+  .customerWorkspace .customerList{display:grid;gap:10px}
+  .customerRow{border:1px solid #e3e8ee;border-radius:12px;background:#fff;padding:12px;box-shadow:0 12px 30px rgba(15,35,56,.04)}
+  .selectedCustomerRow{box-shadow:inset 3px 0 0 #2563eb,0 12px 30px rgba(15,35,56,.04)}
+  .customerProfile{padding:20px}
+  .profileActions{grid-template-columns:1fr}
+  .modal{width:100%;max-height:92vh;border-radius:14px;padding:22px}
+  .backupCard{border-radius:12px}
+  .emptyState{min-height:150px;padding:22px}
+  .authCard{padding:26px 20px;border-radius:14px}
+}
+@media(prefers-reduced-motion:reduce){
+  .content,.modal,.backdrop{animation:none}
+  .primaryButton,.textButton,.inlineLink,.factButton,.customerEditButton,.calendarButton,.backupCard,.moneyCard,.savingsCard,.customerProfile,.jobRow,.historyItem,.profileActions a{transition:none}
+  .primaryButton:hover,.calendarButton:hover,.clickableJobRow:hover,.customerRow:hover,.historyItem:hover{transform:none}
+}
