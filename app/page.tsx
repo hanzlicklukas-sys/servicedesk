@@ -63,6 +63,7 @@ interface AppData {
 }
 
 const STORAGE_KEY = "servicedesk-v2";
+const DELETED_KEY = "servicedesk-deleted-v1";
 const SAVINGS_GOAL = 10000;
 
 function dateFromToday(offset: number) {
@@ -306,6 +307,30 @@ function syncErrorMessage(error: unknown) {
   return "Supabase nicht erreichbar";
 }
 
+interface DeletedRecords {
+  customers: string[];
+  jobs: string[];
+}
+
+function readDeletedRecords(): DeletedRecords {
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(DELETED_KEY) ?? "{}") as Partial<DeletedRecords>;
+    return {
+      customers: Array.isArray(parsed.customers) ? parsed.customers.filter((id) => typeof id === "string") : [],
+      jobs: Array.isArray(parsed.jobs) ? parsed.jobs.filter((id) => typeof id === "string") : []
+    };
+  } catch {
+    return { customers: [], jobs: [] };
+  }
+}
+
+function writeDeletedRecords(records: DeletedRecords) {
+  window.localStorage.setItem(DELETED_KEY, JSON.stringify({
+    customers: [...new Set(records.customers)],
+    jobs: [...new Set(records.jobs)]
+  }));
+}
+
 export default function HomePage() {
   const [view, setView] = useState<View>("dashboard");
   const [data, setData] = useState<AppData>(starterData);
@@ -329,9 +354,15 @@ export default function HomePage() {
   const localDataRef = useRef<AppData>(starterData);
   const remoteLoadedForUserRef = useRef<string | null>(null);
   const skipRemoteRefreshUntilRef = useRef(0);
+  const deletedRecordsRef = useRef<DeletedRecords>({ customers: [], jobs: [] });
 
   function applyRemoteData(remoteData: AppData) {
-    const normalizedRemoteData = normalizeData(remoteData);
+    const deletedCustomers = new Set(deletedRecordsRef.current.customers);
+    const deletedJobs = new Set(deletedRecordsRef.current.jobs);
+    const normalizedRemoteData = normalizeData({
+      customers: remoteData.customers.filter((customer) => !deletedCustomers.has(customer.id)),
+      jobs: remoteData.jobs.filter((job) => !deletedJobs.has(job.id) && !deletedCustomers.has(job.customerId))
+    });
     const remoteSnapshot = JSON.stringify(normalizedRemoteData);
     const localSnapshot = JSON.stringify(localDataRef.current);
 
@@ -346,6 +377,7 @@ export default function HomePage() {
   }
 
   useEffect(() => {
+    deletedRecordsRef.current = readDeletedRecords();
     const saved = window.localStorage.getItem(STORAGE_KEY);
     let localData = starterData;
 
@@ -413,6 +445,13 @@ export default function HomePage() {
 
     remoteLoadedForUserRef.current = session.user.id;
     setSyncStatus("Verbinde mit Supabase");
+
+    Promise.all([
+      ...deletedRecordsRef.current.jobs.map((jobId) => deleteServiceDeskJob(jobId)),
+      ...deletedRecordsRef.current.customers.map((customerId) => deleteServiceDeskCustomer(customerId))
+    ]).catch(() => {
+      // If this fails, the IDs stay in localStorage and will be retried on the next load.
+    });
 
     fetchServiceDeskData()
       .then((remoteData) => {
@@ -602,6 +641,11 @@ export default function HomePage() {
 
   function deleteJob(jobId: string) {
     skipRemoteRefreshUntilRef.current = Date.now() + 3000;
+    deletedRecordsRef.current = {
+      ...deletedRecordsRef.current,
+      jobs: [...deletedRecordsRef.current.jobs, jobId]
+    };
+    writeDeletedRecords(deletedRecordsRef.current);
     setData((current) => ({
       ...current,
       jobs: current.jobs.filter((job) => job.id !== jobId)
@@ -637,6 +681,14 @@ export default function HomePage() {
 
   function deleteCustomer(customerId: string) {
     skipRemoteRefreshUntilRef.current = Date.now() + 3000;
+    const relatedJobIds = localDataRef.current.jobs
+      .filter((job) => job.customerId === customerId)
+      .map((job) => job.id);
+    deletedRecordsRef.current = {
+      customers: [...deletedRecordsRef.current.customers, customerId],
+      jobs: [...deletedRecordsRef.current.jobs, ...relatedJobIds]
+    };
+    writeDeletedRecords(deletedRecordsRef.current);
     setData((current) => ({
       customers: current.customers.filter((customer) => customer.id !== customerId),
       jobs: current.jobs.filter((job) => job.customerId !== customerId)
