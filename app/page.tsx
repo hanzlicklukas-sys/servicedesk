@@ -696,7 +696,11 @@ export default function HomePage() {
     }));
     if (session) {
       deleteServiceDeskCustomer(customerId)
-        .then(() => setSyncStatus("Mit Supabase synchronisiert"))
+        .then(() => fetchServiceDeskData())
+        .then((remoteData) => {
+          const stillExists = remoteData?.customers.some((customer) => customer.id === customerId);
+          setSyncStatus(stillExists ? "Sync-Fehler: Kunde ist noch online" : "Mit Supabase synchronisiert");
+        })
         .catch((error) => setSyncStatus(syncErrorMessage(error)));
     }
     setEditingCustomer(null);

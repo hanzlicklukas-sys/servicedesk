@@ -170,9 +170,10 @@ export async function fetchServiceDeskData(): Promise<SupabaseAppData | null> {
 export async function deleteServiceDeskJob(jobId: string) {
   if (!supabase) return;
 
-  const { error } = await supabase.from("jobs").delete().eq("id", jobId);
+  const { data, error } = await supabase.from("jobs").delete().eq("id", jobId).select("id");
 
   if (error) throw error;
+  if (!data?.length) throw new Error("Auftrag konnte online nicht gelöscht werden");
 }
 
 export async function deleteServiceDeskCustomer(customerId: string) {
@@ -181,8 +182,9 @@ export async function deleteServiceDeskCustomer(customerId: string) {
   const { error: jobsError } = await supabase.from("jobs").delete().eq("customer_id", customerId);
   if (jobsError) throw jobsError;
 
-  const { error: customerError } = await supabase.from("customers").delete().eq("id", customerId);
+  const { data, error: customerError } = await supabase.from("customers").delete().eq("id", customerId).select("id");
   if (customerError) throw customerError;
+  if (!data?.length) throw new Error("Kunde konnte online nicht gelöscht werden");
 }
 
 export async function syncServiceDeskData(data: SupabaseAppData) {
