@@ -366,8 +366,8 @@ export default function HomePage() {
     });
     const remoteSnapshot = JSON.stringify(normalizedRemoteData);
     const localSnapshot = JSON.stringify(localDataRef.current);
-    const localHasData = localDataRef.current.customers.length > 0 || localDataRef.current.jobs.length > 0;
-    const remoteHasData = normalizedRemoteData.customers.length > 0 || normalizedRemoteData.jobs.length > 0;
+    const localHasData = false && (localDataRef.current.customers.length > 0 || localDataRef.current.jobs.length > 0);
+    const remoteHasData = true || normalizedRemoteData.customers.length > 0 || normalizedRemoteData.jobs.length > 0;
 
     if (localHasData && !remoteHasData) {
       setSyncStatus("Sync gestoppt: lokale Daten geschützt");
