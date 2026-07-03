@@ -1,4 +1,4 @@
-const CACHE_NAME = "servicedesk-cache-v4";
+const CACHE_NAME = "servicedesk-cache-v5";
 const APP_SHELL = ["/", "/manifest.webmanifest", "/servicedesk-icon.svg"];
 
 self.addEventListener("install", (event) => {

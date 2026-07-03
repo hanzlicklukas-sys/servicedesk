@@ -358,12 +358,7 @@ export default function HomePage() {
   const deletedRecordsRef = useRef<DeletedRecords>({ customers: [], jobs: [] });
 
   function applyRemoteData(remoteData: AppData) {
-    const deletedCustomers = new Set(deletedRecordsRef.current.customers);
-    const deletedJobs = new Set(deletedRecordsRef.current.jobs);
-    const normalizedRemoteData = normalizeData({
-      customers: remoteData.customers.filter((customer) => !deletedCustomers.has(customer.id)),
-      jobs: remoteData.jobs.filter((job) => !deletedJobs.has(job.id) && !deletedCustomers.has(job.customerId))
-    });
+    const normalizedRemoteData = normalizeData(remoteData);
     const remoteSnapshot = JSON.stringify(normalizedRemoteData);
     const localSnapshot = JSON.stringify(localDataRef.current);
     const localHasData = false && (localDataRef.current.customers.length > 0 || localDataRef.current.jobs.length > 0);
@@ -386,6 +381,14 @@ export default function HomePage() {
 
   useEffect(() => {
     deletedRecordsRef.current = readDeletedRecords();
+
+    if (isSupabaseConfigured) {
+      setData({ customers: [], jobs: [] });
+      localDataRef.current = { customers: [], jobs: [] };
+      setLoaded(true);
+      return;
+    }
+
     const saved = window.localStorage.getItem(STORAGE_KEY);
     let localData = starterData;
 
@@ -427,8 +430,11 @@ export default function HomePage() {
   useEffect(() => {
     if (!loaded) return;
 
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     localDataRef.current = data;
+
+    if (isSupabaseConfigured) return;
+
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 
     if (!isSupabaseConfigured || applyingRemoteDataRef.current) {
       if (!isSupabaseConfigured) setSyncStatus("Lokal gespeichert");
@@ -532,7 +538,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js?v=4").then((registration) => {
+      navigator.serviceWorker.register("/sw.js?v=5").then((registration) => {
         setOfflineReady(true);
         registration.update().catch(() => {});
       }).catch(() => {
