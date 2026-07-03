@@ -494,7 +494,6 @@ export default function HomePage() {
       if (
         stopped ||
         applyingRemoteDataRef.current ||
-        document.hidden ||
         Date.now() < skipRemoteRefreshUntilRef.current
       ) return;
 
@@ -508,6 +507,12 @@ export default function HomePage() {
     }
 
     const interval = window.setInterval(refreshFromSupabase, 5000);
+    const channel = supabase
+      ?.channel(`servicedesk-live-${session.user.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "customers" }, refreshFromSupabase)
+      .on("postgres_changes", { event: "*", schema: "public", table: "jobs" }, refreshFromSupabase)
+      .on("postgres_changes", { event: "*", schema: "public", table: "deleted_records" }, refreshFromSupabase)
+      .subscribe();
 
     function refreshWhenVisible() {
       if (!document.hidden) refreshFromSupabase();
@@ -519,6 +524,7 @@ export default function HomePage() {
     return () => {
       stopped = true;
       window.clearInterval(interval);
+      if (channel) supabase?.removeChannel(channel);
       document.removeEventListener("visibilitychange", refreshWhenVisible);
       window.removeEventListener("focus", refreshFromSupabase);
     };
