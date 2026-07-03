@@ -333,7 +333,7 @@ function writeDeletedRecords(records: DeletedRecords) {
 
 export default function HomePage() {
   const [view, setView] = useState<View>("dashboard");
-  const [data, setData] = useState<AppData>(starterData);
+  const [data, setData] = useState<AppData>(isSupabaseConfigured ? { customers: [], jobs: [] } : starterData);
   const [loaded, setLoaded] = useState(false);
   const [showCustomerForm, setShowCustomerForm] = useState(false);
   const [showJobForm, setShowJobForm] = useState(false);
@@ -760,6 +760,7 @@ export default function HomePage() {
         .then(() => fetchServiceDeskData())
         .then((remoteData) => {
           const stillExists = remoteData?.customers.some((customer) => customer.id === customerId);
+          if (remoteData) applyRemoteData(remoteData);
           setSyncStatus(stillExists ? "Sync-Fehler: Kunde ist noch online" : "Mit Supabase synchronisiert");
         })
         .catch((error) => setSyncStatus(syncErrorMessage(error)));
