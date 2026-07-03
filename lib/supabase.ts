@@ -172,25 +172,6 @@ async function markDeleted(recordType: "customer" | "job", recordId: string) {
   if (error) throw error;
 }
 
-async function deleteRowsMissingLocally(table: "customers" | "jobs", idsToKeep: string[]) {
-  if (!supabase) return;
-
-  const { data, error } = await supabase.from(table).select("id");
-
-  if (error) throw error;
-
-  const keep = new Set(idsToKeep);
-  const staleIds = (data ?? [])
-    .map((row) => String(row.id))
-    .filter((id) => !keep.has(id));
-
-  if (!staleIds.length) return;
-
-  const { error: deleteError } = await supabase.from(table).delete().in("id", staleIds);
-
-  if (deleteError) throw deleteError;
-}
-
 export async function fetchServiceDeskData(): Promise<SupabaseAppData | null> {
   if (!supabase) return null;
 
@@ -278,31 +259,4 @@ export async function saveServiceDeskJob(job: SupabaseJob) {
     .upsert(toJobRow(job), { onConflict: "id" });
 
   if (error) throw error;
-}
-
-export async function syncServiceDeskData(data: SupabaseAppData) {
-  if (!supabase) return;
-
-  const deleted = await fetchDeletedRecords();
-  const visibleCustomers = data.customers.filter((customer) => !deleted.customers.has(customer.id));
-  const visibleJobs = data.jobs.filter(
-    (job) => !deleted.jobs.has(job.id) && !deleted.customers.has(job.customerId)
-  );
-  const customerRows = visibleCustomers.map(toCustomerRow);
-  const jobRows = visibleJobs.map(toJobRow);
-  const customerIds = visibleCustomers.map((customer) => customer.id);
-  const jobIds = visibleJobs.map((job) => job.id);
-
-  if (customerRows.length) {
-    const { error } = await supabase.from("customers").upsert(customerRows, { onConflict: "id" });
-    if (error) throw error;
-  }
-
-  if (jobRows.length) {
-    const { error } = await supabase.from("jobs").upsert(jobRows, { onConflict: "id" });
-    if (error) throw error;
-  }
-
-  await deleteRowsMissingLocally("jobs", jobIds);
-  await deleteRowsMissingLocally("customers", customerIds);
 }
