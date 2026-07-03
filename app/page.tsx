@@ -66,6 +66,7 @@ const STORAGE_KEY = "servicedesk-v2";
 const DELETED_KEY = "servicedesk-deleted-v1";
 const APP_VERSION_KEY = "servicedesk-app-version";
 const APP_VERSION = "cloud-only-2026-07-03-2";
+const BUILD_MARK = "Cloud v3";
 const SAVINGS_GOAL = 10000;
 
 function dateFromToday(offset: number) {
@@ -948,7 +949,7 @@ export default function HomePage() {
         <header className={styles.topbar}>
           <div>
             <h1>{viewTitles[view]}</h1>
-            <p>{view === "dashboard" ? todayLabel : "ServiceDesk"}</p>
+            <p>{view === "dashboard" ? `${todayLabel} · ${BUILD_MARK}` : `ServiceDesk · ${BUILD_MARK}`}</p>
           </div>
           <div className={styles.topActions}>
             {isSupabaseConfigured && (
