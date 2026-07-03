@@ -23,7 +23,7 @@ import {
 } from "@phosphor-icons/react";
 import { ChangeEvent, FormEvent, ReactNode, RefObject, useEffect, useMemo, useRef, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { deleteServiceDeskCustomer, deleteServiceDeskJob, fetchServiceDeskData, isSupabaseConfigured, supabase, syncServiceDeskData, type SupabaseAppData } from "@/lib/supabase";
+import { deleteServiceDeskCustomer, deleteServiceDeskJob, fetchServiceDeskData, isSupabaseConfigured, saveServiceDeskCustomer, saveServiceDeskJob, supabase, syncServiceDeskData, type SupabaseAppData } from "@/lib/supabase";
 import styles from "./page.module.css";
 
 type ServiceType = "Garten" | "Technik";
@@ -446,6 +446,8 @@ export default function HomePage() {
       return;
     }
 
+    return;
+
     const timeout = window.setTimeout(() => {
       syncServiceDeskData(data as SupabaseAppData)
         .then(() => setSyncStatus("Mit Supabase synchronisiert"))
@@ -599,6 +601,15 @@ export default function HomePage() {
       createdAt: dateFromToday(0)
     };
     setData((current) => ({ ...current, customers: [customer, ...current.customers] }));
+    if (session) {
+      saveServiceDeskCustomer(customer)
+        .then(() => fetchServiceDeskData())
+        .then((remoteData) => {
+          if (remoteData) applyRemoteData(remoteData);
+          setSyncStatus("Mit Supabase synchronisiert");
+        })
+        .catch((error) => setSyncStatus(syncErrorMessage(error)));
+    }
     setShowCustomerForm(false);
   }
 
@@ -621,6 +632,15 @@ export default function HomePage() {
       status: "Geplant"
     };
     setData((current) => ({ ...current, jobs: [job, ...current.jobs] }));
+    if (session) {
+      saveServiceDeskJob(job)
+        .then(() => fetchServiceDeskData())
+        .then((remoteData) => {
+          if (remoteData) applyRemoteData(remoteData);
+          setSyncStatus("Mit Supabase synchronisiert");
+        })
+        .catch((error) => setSyncStatus(syncErrorMessage(error)));
+    }
     setShowJobForm(false);
   }
 
@@ -648,6 +668,15 @@ export default function HomePage() {
       ...current,
       jobs: current.jobs.map((job) => job.id === updatedJob.id ? updatedJob : job)
     }));
+    if (session) {
+      saveServiceDeskJob(updatedJob)
+        .then(() => fetchServiceDeskData())
+        .then((remoteData) => {
+          if (remoteData) applyRemoteData(remoteData);
+          setSyncStatus("Mit Supabase synchronisiert");
+        })
+        .catch((error) => setSyncStatus(syncErrorMessage(error)));
+    }
     setEditingJob(null);
   }
 
@@ -688,6 +717,15 @@ export default function HomePage() {
         customer.id === updatedCustomer.id ? updatedCustomer : customer
       )
     }));
+    if (session) {
+      saveServiceDeskCustomer(updatedCustomer)
+        .then(() => fetchServiceDeskData())
+        .then((remoteData) => {
+          if (remoteData) applyRemoteData(remoteData);
+          setSyncStatus("Mit Supabase synchronisiert");
+        })
+        .catch((error) => setSyncStatus(syncErrorMessage(error)));
+    }
     setEditingCustomer(null);
   }
 
@@ -724,19 +762,31 @@ export default function HomePage() {
       Erledigt: "Bezahlt",
       Bezahlt: "Bezahlt"
     };
+    let updatedJob: Job | null = null;
     setData((current) => ({
       ...current,
       jobs: current.jobs.map((job) => {
         if (job.id !== jobId) return job;
         const status = nextStatus[job.status];
-        return {
+        updatedJob = {
           ...job,
           status,
           paidAt: status === "Bezahlt" ? job.paidAt || job.date || dateFromToday(0) : job.paidAt,
           paymentMethod: status === "Bezahlt" ? "Bar" : job.paymentMethod
         };
+        return updatedJob;
       })
     }));
+    window.setTimeout(() => {
+      if (!session || !updatedJob) return;
+      saveServiceDeskJob(updatedJob)
+        .then(() => fetchServiceDeskData())
+        .then((remoteData) => {
+          if (remoteData) applyRemoteData(remoteData);
+          setSyncStatus("Mit Supabase synchronisiert");
+        })
+        .catch((error) => setSyncStatus(syncErrorMessage(error)));
+    }, 0);
   }
 
   function exportBackup() {

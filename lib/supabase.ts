@@ -243,6 +243,26 @@ export async function deleteServiceDeskCustomer(customerId: string) {
   if (customerError) throw customerError;
 }
 
+export async function saveServiceDeskCustomer(customer: SupabaseCustomer) {
+  if (!supabase) return;
+
+  const { error } = await supabase
+    .from("customers")
+    .upsert(toCustomerRow(customer), { onConflict: "id" });
+
+  if (error) throw error;
+}
+
+export async function saveServiceDeskJob(job: SupabaseJob) {
+  if (!supabase) return;
+
+  const { error } = await supabase
+    .from("jobs")
+    .upsert(toJobRow(job), { onConflict: "id" });
+
+  if (error) throw error;
+}
+
 export async function syncServiceDeskData(data: SupabaseAppData) {
   if (!supabase) return;
 
