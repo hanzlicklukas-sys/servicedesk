@@ -7,6 +7,7 @@ create table if not exists public.customers (
   service text not null check (service in ('Garten', 'Technik', 'Beides')),
   note text not null default '',
   created_at date not null,
+  deleted_at timestamptz,
   updated_at timestamptz not null default now()
 );
 
@@ -25,6 +26,7 @@ create table if not exists public.jobs (
   paid_at text not null default '',
   note text not null default '',
   status text not null check (status in ('Anfrage', 'Geplant', 'Erledigt', 'Bezahlt')),
+  deleted_at timestamptz,
   updated_at timestamptz not null default now()
 );
 
@@ -42,8 +44,16 @@ add column if not exists user_id uuid references auth.users(id) on delete cascad
 alter table public.jobs
 add column if not exists user_id uuid references auth.users(id) on delete cascade default auth.uid();
 
+alter table public.customers
+add column if not exists deleted_at timestamptz;
+
+alter table public.jobs
+add column if not exists deleted_at timestamptz;
+
 create index if not exists customers_user_id_idx on public.customers(user_id);
 create index if not exists jobs_user_id_idx on public.jobs(user_id);
+create index if not exists customers_deleted_at_idx on public.customers(deleted_at);
+create index if not exists jobs_deleted_at_idx on public.jobs(deleted_at);
 create index if not exists deleted_records_user_id_idx on public.deleted_records(user_id);
 
 create or replace function public.set_updated_at()

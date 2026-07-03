@@ -44,6 +44,7 @@ type CustomerRow = {
   service: SupabaseServiceType;
   note: string;
   created_at: string;
+  deleted_at?: string | null;
 };
 
 type JobRow = {
@@ -60,6 +61,7 @@ type JobRow = {
   paid_at: string;
   note: string;
   status: SupabaseJobStatus;
+  deleted_at?: string | null;
 };
 
 type DeletedRecordRow = {
@@ -194,8 +196,8 @@ export async function fetchServiceDeskData(): Promise<SupabaseAppData | null> {
 
   const [deleted, customersResult, jobsResult] = await Promise.all([
     fetchDeletedRecords(),
-    supabase.from("customers").select("*").order("created_at", { ascending: false }),
-    supabase.from("jobs").select("*").order("date", { ascending: false })
+    supabase.from("customers").select("*").is("deleted_at", null).order("created_at", { ascending: false }),
+    supabase.from("jobs").select("*").is("deleted_at", null).order("date", { ascending: false })
   ]);
 
   if (customersResult.error) throw customersResult.error;
@@ -216,9 +218,14 @@ export async function deleteServiceDeskJob(jobId: string) {
 
   await markDeleted("job", jobId);
 
-  const { error } = await supabase.from("jobs").delete().eq("id", jobId);
+  const { data, error } = await supabase
+    .from("jobs")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", jobId)
+    .select("id");
 
   if (error) throw error;
+  if (!data?.length) throw new Error("Auftrag wurde online nicht gefunden");
 }
 
 export async function deleteServiceDeskCustomer(customerId: string) {
@@ -236,11 +243,21 @@ export async function deleteServiceDeskCustomer(customerId: string) {
     ...(relatedJobs ?? []).map((job) => markDeleted("job", String(job.id)))
   ]);
 
-  const { error: jobsError } = await supabase.from("jobs").delete().eq("customer_id", customerId);
+  const deletedAt = new Date().toISOString();
+
+  const { error: jobsError } = await supabase
+    .from("jobs")
+    .update({ deleted_at: deletedAt })
+    .eq("customer_id", customerId);
   if (jobsError) throw jobsError;
 
-  const { error: customerError } = await supabase.from("customers").delete().eq("id", customerId);
+  const { data, error: customerError } = await supabase
+    .from("customers")
+    .update({ deleted_at: deletedAt })
+    .eq("id", customerId)
+    .select("id");
   if (customerError) throw customerError;
+  if (!data?.length) throw new Error("Kunde wurde online nicht gefunden");
 }
 
 export async function saveServiceDeskCustomer(customer: SupabaseCustomer) {
