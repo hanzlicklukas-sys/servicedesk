@@ -23,7 +23,7 @@ import {
 } from "@phosphor-icons/react";
 import { ChangeEvent, FormEvent, ReactNode, RefObject, useEffect, useMemo, useRef, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { deleteServiceDeskCustomer, deleteServiceDeskJob, fetchServiceDeskData, isSupabaseConfigured, saveServiceDeskCustomer, saveServiceDeskJob, supabase, syncServiceDeskData, type SupabaseAppData } from "@/lib/supabase";
+import { deleteServiceDeskCustomer, deleteServiceDeskJob, fetchServiceDeskData, isSupabaseConfigured, saveServiceDeskCustomer, saveServiceDeskJob, supabase } from "@/lib/supabase";
 import styles from "./page.module.css";
 
 type ServiceType = "Garten" | "Technik";
@@ -64,6 +64,8 @@ interface AppData {
 
 const STORAGE_KEY = "servicedesk-v2";
 const DELETED_KEY = "servicedesk-deleted-v1";
+const APP_VERSION_KEY = "servicedesk-app-version";
+const APP_VERSION = "cloud-only-2026-07-03-2";
 const SAVINGS_GOAL = 10000;
 
 function dateFromToday(offset: number) {
@@ -325,6 +327,8 @@ function readDeletedRecords(): DeletedRecords {
 }
 
 function writeDeletedRecords(records: DeletedRecords) {
+  if (isSupabaseConfigured) return;
+
   window.localStorage.setItem(DELETED_KEY, JSON.stringify({
     customers: [...new Set(records.customers)],
     jobs: [...new Set(records.jobs)]
@@ -373,7 +377,6 @@ export default function HomePage() {
 
     applyingRemoteDataRef.current = true;
     setData(normalizedRemoteData);
-    window.localStorage.setItem(STORAGE_KEY, remoteSnapshot);
     window.setTimeout(() => {
       applyingRemoteDataRef.current = false;
     }, 0);
@@ -383,6 +386,24 @@ export default function HomePage() {
     deletedRecordsRef.current = readDeletedRecords();
 
     if (isSupabaseConfigured) {
+      const shouldClearBrowserCache = window.localStorage.getItem(APP_VERSION_KEY) !== APP_VERSION;
+
+      window.localStorage.removeItem(STORAGE_KEY);
+      window.localStorage.removeItem(DELETED_KEY);
+      deletedRecordsRef.current = { customers: [], jobs: [] };
+      window.localStorage.setItem(APP_VERSION_KEY, APP_VERSION);
+
+      if (shouldClearBrowserCache) {
+        if ("caches" in window) {
+          caches.keys()
+            .then((keys) => Promise.all(
+              keys
+                .filter((key) => key.startsWith("servicedesk-cache"))
+                .map((key) => caches.delete(key))
+            ))
+            .catch(() => {});
+        }
+      }
       setData({ customers: [], jobs: [] });
       localDataRef.current = { customers: [], jobs: [] };
       setLoaded(true);
@@ -435,33 +456,8 @@ export default function HomePage() {
     if (isSupabaseConfigured) return;
 
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-
-    if (!isSupabaseConfigured || applyingRemoteDataRef.current) {
-      if (!isSupabaseConfigured) setSyncStatus("Lokal gespeichert");
-      return;
-    }
-
-    setSyncStatus("Sync läuft");
-    if (!session) {
-      setSyncStatus(authReady ? "Bitte einloggen" : "Login wird geprüft");
-      return;
-    }
-
-    if (remoteReadyForUserRef.current !== session.user.id) {
-      setSyncStatus("Lade Supabase-Daten");
-      return;
-    }
-
-    return;
-
-    const timeout = window.setTimeout(() => {
-      syncServiceDeskData(data as SupabaseAppData)
-        .then(() => setSyncStatus("Mit Supabase synchronisiert"))
-        .catch((error) => setSyncStatus(syncErrorMessage(error)));
-    }, 700);
-
-    return () => window.clearTimeout(timeout);
-  }, [authReady, data, loaded, session]);
+    setSyncStatus("Lokal gespeichert");
+  }, [data, loaded]);
 
   useEffect(() => {
     if (!loaded || !authReady || !session) return;
@@ -538,7 +534,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js?v=5").then((registration) => {
+      navigator.serviceWorker.register("/sw.js?v=6").then((registration) => {
         setOfflineReady(true);
         registration.update().catch(() => {});
       }).catch(() => {
