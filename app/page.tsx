@@ -12,6 +12,7 @@ import {
   GearSix,
   House,
   MapPin,
+  MagnifyingGlass,
   Phone,
   PencilSimple,
   Plus,
@@ -30,6 +31,7 @@ type ServiceType = "Garten" | "Technik";
 type JobStatus = "Anfrage" | "Geplant" | "Erledigt" | "Bezahlt";
 type PaymentMethod = "Offen" | "Bar" | "Überweisung" | "PayPal";
 type View = "dashboard" | "customers" | "jobs" | "finance" | "backup";
+type JobFilter = "Alle" | JobStatus;
 
 interface Customer {
   id: string;
@@ -66,7 +68,7 @@ const STORAGE_KEY = "servicedesk-v2";
 const DELETED_KEY = "servicedesk-deleted-v1";
 const APP_VERSION_KEY = "servicedesk-app-version";
 const APP_VERSION = "cloud-only-2026-07-03-2";
-const BUILD_MARK = "Cloud v3";
+const BUILD_MARK = "Cloud v4";
 const SAVINGS_GOAL = 10000;
 
 function dateFromToday(offset: number) {
@@ -345,6 +347,8 @@ export default function HomePage() {
   const [editingJob, setEditingJob] = useState<Job | null>(null);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [jobFilter, setJobFilter] = useState<JobFilter>("Alle");
   const [backupStatus, setBackupStatus] = useState("Noch kein Backup in dieser Sitzung.");
   const [isOffline, setIsOffline] = useState(false);
   const [offlineReady, setOfflineReady] = useState(false);
@@ -354,6 +358,7 @@ export default function HomePage() {
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const [authError, setAuthError] = useState("");
   const [authBusy, setAuthBusy] = useState(false);
+  const [designPreview, setDesignPreview] = useState(false);
   const importInputRef = useRef<HTMLInputElement>(null);
   const applyingRemoteDataRef = useRef(false);
   const localDataRef = useRef<AppData>(starterData);
@@ -384,6 +389,20 @@ export default function HomePage() {
   }
 
   useEffect(() => {
+    if (process.env.NODE_ENV === "development" && new URLSearchParams(window.location.search).has("design-preview")) {
+      setData(starterData);
+      localDataRef.current = starterData;
+      setLoaded(true);
+      setAuthReady(true);
+      setDesignPreview(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development" && new URLSearchParams(window.location.search).has("design-preview")) {
+      return;
+    }
+
     deletedRecordsRef.current = readDeletedRecords();
 
     if (isSupabaseConfigured) {
@@ -535,6 +554,19 @@ export default function HomePage() {
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
+      if (isSupabaseConfigured) {
+        navigator.serviceWorker.getRegistrations()
+          .then((registrations) => Promise.all(registrations.map((registration) => registration.unregister())))
+          .catch(() => {});
+        if ("caches" in window) {
+          caches.keys()
+            .then((keys) => Promise.all(keys.filter((key) => key.startsWith("servicedesk-cache")).map((key) => caches.delete(key))))
+            .catch(() => {});
+        }
+        setOfflineReady(false);
+        return;
+      }
+
       navigator.serviceWorker.register("/sw.js?v=6").then((registration) => {
         setOfflineReady(true);
         registration.update().catch(() => {});
@@ -560,6 +592,11 @@ export default function HomePage() {
       window.removeEventListener("offline", updateConnectionState);
     };
   }, []);
+
+  useEffect(() => {
+    setSearchQuery("");
+    if (view !== "jobs") setJobFilter("Alle");
+  }, [view]);
 
   const customerMap = useMemo(
     () => new Map(data.customers.map((customer) => [customer.id, customer])),
@@ -591,6 +628,22 @@ export default function HomePage() {
       .filter((job) => job.customerId === selectedCustomer.id)
       .sort((a, b) => b.date.localeCompare(a.date) || b.time.localeCompare(a.time))
     : [];
+  const normalizedQuery = searchQuery.trim().toLocaleLowerCase("de-DE");
+  const filteredCustomers = normalizedQuery
+    ? data.customers.filter((customer) =>
+      [customer.name, customer.phone, customer.address, customer.service, customer.note]
+        .some((value) => value.toLocaleLowerCase("de-DE").includes(normalizedQuery))
+    )
+    : data.customers;
+  const filteredJobs = [...data.jobs]
+    .filter((job) => jobFilter === "Alle" || job.status === jobFilter)
+    .filter((job) => {
+      if (!normalizedQuery) return true;
+      const customer = customerMap.get(job.customerId);
+      return [job.title, job.service, job.status, customer?.name ?? "", customer?.address ?? ""]
+        .some((value) => value.toLocaleLowerCase("de-DE").includes(normalizedQuery));
+    })
+    .sort((a, b) => b.date.localeCompare(a.date) || b.time.localeCompare(a.time));
   const todayLabel = new Intl.DateTimeFormat("de-DE", {
     weekday: "short",
     day: "2-digit",
@@ -884,7 +937,7 @@ export default function HomePage() {
     setSyncStatus("Bitte einloggen");
   }
 
-  if (isSupabaseConfigured && !authReady) {
+  if (isSupabaseConfigured && !authReady && !designPreview) {
     return (
       <main className={styles.authShell}>
         <section className={styles.authCard}>
@@ -896,7 +949,7 @@ export default function HomePage() {
     );
   }
 
-  if (isSupabaseConfigured && !session) {
+  if (isSupabaseConfigured && !session && !designPreview) {
     return (
       <main className={styles.authShell}>
         <section className={styles.authCard}>
@@ -952,7 +1005,18 @@ export default function HomePage() {
             <p>{view === "dashboard" ? `${todayLabel} · ${BUILD_MARK}` : `ServiceDesk · ${BUILD_MARK}`}</p>
           </div>
           <div className={styles.topActions}>
-            {isSupabaseConfigured && (
+            {(view === "customers" || view === "jobs") && (
+              <label className={styles.searchBox}>
+                <MagnifyingGlass />
+                <input
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder={view === "customers" ? "Kunden suchen" : "Aufträge suchen"}
+                  aria-label={view === "customers" ? "Kunden suchen" : "Aufträge suchen"}
+                />
+              </label>
+            )}
+            {isSupabaseConfigured && session && (
               <button className={styles.textButton} onClick={signOut}>
                 Abmelden
               </button>
@@ -989,10 +1053,10 @@ export default function HomePage() {
 
         {view === "customers" && (
           <section className={styles.pageSection}>
-            <div className={styles.sectionHeader}><div><span>Kundenkartei</span><h2>{data.customers.length} Kontakte</h2></div></div>
+            <div className={styles.sectionHeader}><div><span>Kundenkartei</span><h2>{filteredCustomers.length} Kontakte</h2></div></div>
             <div className={styles.customerWorkspace}>
               <div className={styles.customerList}>
-                {data.customers.map((customer) => (
+                {filteredCustomers.map((customer) => (
                   <article
                     className={`${styles.customerRow} ${selectedCustomer?.id === customer.id ? styles.selectedCustomerRow : ""}`}
                     key={customer.id}
@@ -1016,6 +1080,9 @@ export default function HomePage() {
                     </button>
                   </article>
                 ))}
+                {filteredCustomers.length === 0 && (
+                  <EmptyState icon={<MagnifyingGlass />} title="Niemand gefunden" text="Versuche einen anderen Namen, Ort oder eine Telefonnummer." />
+                )}
               </div>
               {selectedCustomer && (
                 <CustomerProfile
@@ -1031,9 +1098,21 @@ export default function HomePage() {
 
         {view === "jobs" && (
           <section className={styles.pageSection}>
-            <div className={styles.sectionHeader}><div><span>Auftragsliste</span><h2>{data.jobs.length} Aufträge</h2></div></div>
+            <div className={styles.sectionHeader}><div><span>Auftragsliste</span><h2>{filteredJobs.length} Aufträge</h2></div></div>
+            <div className={styles.filterBar} aria-label="Aufträge filtern">
+              {(["Alle", "Anfrage", "Geplant", "Erledigt", "Bezahlt"] as JobFilter[]).map((filter) => (
+                <button
+                  className={jobFilter === filter ? styles.activeFilter : ""}
+                  type="button"
+                  onClick={() => setJobFilter(filter)}
+                  key={filter}
+                >
+                  {filter}
+                </button>
+              ))}
+            </div>
             <JobTable
-              jobs={[...data.jobs].sort((a, b) => b.date.localeCompare(a.date) || b.time.localeCompare(a.time))}
+              jobs={filteredJobs}
               customers={customerMap}
               onAdvance={advanceStatus}
               onEdit={setEditingJob}
@@ -1164,38 +1243,57 @@ function Dashboard({
   return (
     <>
       <div className={styles.dashboardFacts}>
-        <span><CalendarBlank />{todayJobs.length} Termine heute</span>
-        <span><Briefcase />{openJobs} Aufträge offen</span>
-        <span><Users />{newCustomersThisMonth} neue Kunden</span>
-        <span><CurrencyEur />{formatMoney(totalRevenue)} gesamt verdient</span>
-        <button className={styles.factButton} onClick={onShowFinance}><CurrencyEur />{formatMoney(monthRevenue)} diesen Monat</button>
-      </div>
-      {doneWithoutPrice > 0 && (
-        <button className={styles.notice} onClick={onShowJobs}>
-          <Receipt /> {doneWithoutPrice} erledigte Aufträge brauchen noch einen Endpreis
+        <article>
+          <span><CalendarBlank /> Heute</span>
+          <strong>{todayJobs.length}</strong>
+          <small>{todayJobs.length === 1 ? "Termin geplant" : "Termine geplant"}</small>
+        </article>
+        <article>
+          <span><Briefcase /> Offen</span>
+          <strong>{openJobs}</strong>
+          <small>Aufträge im Blick</small>
+        </article>
+        <article>
+          <span><Users /> Neue Kunden</span>
+          <strong>{newCustomersThisMonth}</strong>
+          <small>in diesem Monat</small>
+        </article>
+        <button className={styles.revenueCard} onClick={onShowFinance}>
+          <span><CurrencyEur /> Umsatz</span>
+          <strong>{formatMoney(monthRevenue)}</strong>
+          <small>{formatMoney(totalRevenue)} insgesamt <ArrowRight /></small>
         </button>
-      )}
-      <MoneyGrowthCard history={totalMoneyHistory} totalRevenue={totalRevenue} onShowFinance={onShowFinance} />
-      <div className={styles.dashboardGrid}>
-        <section className={styles.schedule}>
-          <div className={styles.sectionHeader}><h2>Tagesplan</h2></div>
-          <JobTable jobs={upcomingJobs.slice(0, 4)} customers={customers} compact onEdit={onOpenJob} />
-          <button className={styles.inlineLink} onClick={onShowJobs}>Alle Termine <ArrowRight /></button>
-        </section>
-        <aside className={styles.nextAppointment}>
-          <span className={styles.overline}>Nächster Termin</span>
-          {nextJob && nextCustomer ? (
-            <>
-              <h2>{nextCustomer.name}</h2>
-              <p className={styles.detailLine}><MapPin />{nextCustomer.address}</p>
-              <a className={styles.detailLine} href={`tel:${nextCustomer.phone}`}><Phone />{nextCustomer.phone}</a>
-              <p className={styles.appointmentNote}>{nextJob.note || nextCustomer.note || nextJob.title}</p>
-              <a className={styles.inlineLink} href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(nextCustomer.address)}`} target="_blank" rel="noreferrer">
-                Route <ArrowRight />
-              </a>
-            </>
-          ) : <p className={styles.muted}>Kein weiterer Termin geplant.</p>}
-        </aside>
+      </div>
+      <div className={styles.dashboardBody}>
+        {doneWithoutPrice > 0 && (
+          <button className={styles.notice} onClick={onShowJobs}>
+            <Receipt /> {doneWithoutPrice === 1
+              ? "1 erledigter Auftrag braucht noch einen Endpreis"
+              : `${doneWithoutPrice} erledigte Aufträge brauchen noch einen Endpreis`}
+          </button>
+        )}
+        <MoneyGrowthCard history={totalMoneyHistory} totalRevenue={totalRevenue} onShowFinance={onShowFinance} />
+        <div className={styles.dashboardGrid}>
+          <section className={styles.schedule}>
+            <div className={styles.sectionHeader}><h2>Tagesplan</h2></div>
+            <JobTable jobs={upcomingJobs.slice(0, 4)} customers={customers} compact onEdit={onOpenJob} />
+            <button className={styles.inlineLink} onClick={onShowJobs}>Alle Termine <ArrowRight /></button>
+          </section>
+          <aside className={styles.nextAppointment}>
+            <span className={styles.overline}>Nächster Termin</span>
+            {nextJob && nextCustomer ? (
+              <>
+                <h2>{nextCustomer.name}</h2>
+                <p className={styles.detailLine}><MapPin />{nextCustomer.address}</p>
+                <a className={styles.detailLine} href={`tel:${nextCustomer.phone}`}><Phone />{nextCustomer.phone}</a>
+                <p className={styles.appointmentNote}>{nextJob.note || nextCustomer.note || nextJob.title}</p>
+                <a className={styles.inlineLink} href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(nextCustomer.address)}`} target="_blank" rel="noreferrer">
+                  Route <ArrowRight />
+                </a>
+              </>
+            ) : <p className={styles.muted}>Kein weiterer Termin geplant.</p>}
+          </aside>
+        </div>
       </div>
     </>
   );
@@ -1211,9 +1309,9 @@ function MoneyGrowthCard({
   onShowFinance: () => void;
 }) {
   const width = 720;
-  const height = 220;
+  const height = 160;
   const paddingX = 28;
-  const paddingY = 26;
+  const paddingY = 20;
   const maxValue = Math.max(...history.map((point) => point.total), totalRevenue, 1);
   const chartWidth = width - paddingX * 2;
   const chartHeight = height - paddingY * 2;
@@ -1482,7 +1580,9 @@ function FinanceDashboard({
       </section>
       {doneWithoutPrice > 0 && (
         <button className={styles.notice} onClick={onOpenJobs}>
-          <Receipt /> {doneWithoutPrice} erledigte Aufträge haben noch keinen Preis
+          <Receipt /> {doneWithoutPrice === 1
+            ? "1 erledigter Auftrag hat noch keinen Preis"
+            : `${doneWithoutPrice} erledigte Aufträge haben noch keinen Preis`}
         </button>
       )}
       <div className={styles.financeGrid}>
@@ -1557,7 +1657,11 @@ function JobTable({
                 {onEdit && <button className={styles.editButton} onClick={(event) => { event.stopPropagation(); onEdit(job); }} aria-label={`${job.title} bearbeiten`}><PencilSimple /></button>}
               </div>
             </div>
-          ) : <span className={styles.statusText}>{onEdit ? "Details" : job.status}</span>}
+          ) : (
+            <span className={`${styles.statusChip} ${styles[`status${job.status}`]}`}>
+              {job.status}
+            </span>
+          )}
         </article>
       ))}
     </div>
