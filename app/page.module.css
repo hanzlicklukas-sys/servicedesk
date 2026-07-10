@@ -287,8 +287,10 @@
 @media(max-width:720px){
   .shell{padding-bottom:84px}
   .sidebar{inset:auto 10px max(8px,env(safe-area-inset-bottom)) 10px;width:auto;height:68px;border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:6px;background:rgba(7,21,34,.96);box-shadow:0 18px 60px rgba(7,21,34,.28);backdrop-filter:blur(18px)}
-  .navigation{grid-template-columns:repeat(5,1fr);gap:2px}
-  .navigation button{min-height:54px;border-radius:12px;padding:6px 2px;font-size:.55rem}
+  .navigation{height:100%;margin:0;grid-template-columns:repeat(5,1fr);align-items:center;gap:2px}
+  .navigation button{min-height:0;height:54px;border-radius:12px;padding:5px 2px;font-size:.55rem;align-content:center}
+  .navigation svg{width:19px;height:19px}
+  .navigation button span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .navigation .active::before{left:50%;top:auto;bottom:-2px;width:20px;height:3px;border-radius:4px;transform:translateX(-50%)}
   .content{margin-left:0;padding:24px 16px 38px}
   .topbar{display:grid;gap:18px;margin-bottom:24px}
